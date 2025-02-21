@@ -125,41 +125,61 @@ for lead, lead_number in leads.items():
     )
     class_weights = dict(enumerate(class_weights))
 
-    # Construção do modelo CNN-LSTM
-    model = Sequential([
-        # Primeira camada convolucional
-        Conv1D(filters=64, kernel_size=5, activation='relu', input_shape=(700, 1)),
-        MaxPooling1D(pool_size=2),
-        Dropout(0.2),
-        
-        # Segunda camada convolucional
-        Conv1D(filters=64, kernel_size=3, activation='relu'),
-        
-        # Camada LSTM
-        LSTM(units=64, return_sequences=True, activation='tanh', seed = 490),
-        #LSTM(units=64, return_sequences=False, activation='tanh', seed = 490),
-        
-        # Flatten para converter em vetor
-        Flatten(),
-        
-        # Primeira camada Dense totalmente conectada
-        Dense(units=64, activation='relu'),
-        Dropout(0.2),
-        
-        # Camada Dense de saída
-        Dense(units=11, activation='softmax')
-    ])
+    with tf.device('/CPU:0'):
+        # Construção do modelo CNN-LSTM
+        model = Sequential([
+            # Primeira camada convolucional
+            Conv1D(filters=64, kernel_size=5, activation='relu', input_shape=(700, 1)),
+            MaxPooling1D(pool_size=2),
+            Dropout(0.2),
+            
+            # Segunda camada convolucional
+            Conv1D(filters=64, kernel_size=3, activation='relu'),
+            
+            # Camada LSTM
+            #LSTM(units=64, return_sequences=True, activation='tanh', recurrent_activation='sigmoid', implementation=2, recurrent_dropout=0.2, kernel_regularizer=tf.keras.regularizers.l2(0.01)),
+
+            # Camada LSTM
+            LSTM(units=64, return_sequences=True, activation='tanh', recurrent_activation='sigmoid'),
+
+
+            #LSTM(units=64, return_sequences=False, activation='tanh', seed = 490),
+            
+            # Flatten para converter em vetor
+            Flatten(),
+            
+            # Primeira camada Dense totalmente conectada
+            BatchNormalization(),
+            Dense(units=64, activation='relu'),
+            Dropout(0.2),
+            
+            # Camada Dense de saída
+            Dense(units=11, activation='softmax')
+        ])
 
     # Compilação do modelo
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     #model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
+    """
     for i in range(X_train.shape[0]):
         X_train[i,:] = X_train[i,:] / np.max(X_train[i,:])
     for i in range(X_val.shape[0]):
         X_val[i,:] = X_val[i,:] / np.max(X_val[i,:])
     for i in range(X_test.shape[0]):
         X_test[i,:] = X_test[i,:] / np.max(X_test[i,:])
+    """
+
+    # Calcular a média e o desvio padrão no conjunto de treino
+    mean = np.mean(X_train, axis=0)  # Média por cada coluna (canal ou tempo)
+    std = np.std(X_train, axis=0)    # Desvio padrão por cada coluna
+
+    # Evitar divisão por zero (caso algum std seja zero)
+    std[std == 0] = 1
+
+    # Aplicar normalização (Z-score) a todos os conjuntos
+    X_train = (X_train - mean) / std
+    X_val = (X_val - mean) / std
+    X_test = (X_test - mean) / std
 
     y_train = np.expand_dims(y_train, axis=-1)
     y_test = np.expand_dims(y_test, axis=-1)
@@ -172,7 +192,7 @@ for lead, lead_number in leads.items():
         X_train,
         y_train, 
         epochs = 10, 
-        batch_size = 10000, 
+        batch_size = 64, 
         validation_data = (X_val, y_val),
         #class_weight=class_weights,
         shuffle=True
@@ -191,6 +211,20 @@ for lead, lead_number in leads.items():
 
     y_pred = model.predict(X_test)
     y_pred = np.argmax(y_pred, axis=1)
+
+        # Criar figura do gráfico
+    plt.figure(figsize=(8, 5))
+    plt.plot(history.history['loss'], label='Loss Treinamento', color='blue')
+    plt.plot(history.history['val_loss'], label='Loss Validação', color='red')
+    plt.xlabel('Épocas')
+    plt.ylabel('Loss')
+    plt.title('Loss de Treinamento vs Loss de Validação')
+    plt.legend()
+    plt.grid(False)
+
+    # Caminho para salvar
+    loss_plot_path = PATH_TO_SAVE_RESULTS + f'/loss_plot_{lead}.png'
+    plt.savefig(loss_plot_path, dpi=300)  # Salvar com alta resolução
 
     cm = confusion_matrix(y_test, y_pred)
     #Save cm to csv

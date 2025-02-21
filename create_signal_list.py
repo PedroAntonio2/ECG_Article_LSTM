@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import time
 
-def create_signal_list_2_labels(path = 'ptb-diagnostic-ecg-database'):
+def ptb_diagnostic_create_signal_list_2_labels_(path = 'ptb-diagnostic-ecg-database'):
     signals = {'path': [], 'labels': []}
     count_MI = 0
     count_HC = 0
@@ -36,11 +36,6 @@ def create_signal_list_2_labels(path = 'ptb-diagnostic-ecg-database'):
     print(f"MI: {count_MI}")
     print(f"HC: {count_HC}")
     total = {'MI': count_MI, 'HC': count_HC, 'total': count_MI+count_HC}
-    
-    df = pd.DataFrame(signals['path'], columns=['path'])
-    df['label'] = signals['labels']
-    df.to_csv('signals_list.csv', index=False)
-    split_csv_train_val_test(df)
 
 def create_signal_list_11_labels(path = 'ptb-diagnostic-ecg-database'):
     signals = {'path': [], 'labels': []}
@@ -122,7 +117,7 @@ def split_csv_train_val_test(signal_list, labels = '2_labels'):
     val_df, test_df = train_test_split(temp_df, test_size=0.5, random_state=490)
 
     if labels == '11_labels':
-        train_df.to_csv('signals_list_train_11_labels.csv', index=False)
+        train_df.to_csv( index=False)
         val_df.to_csv('signals_list_val_11_labels.csv', index=False)
         test_df.to_csv('signals_list_test_11_labels.csv', index=False)
 

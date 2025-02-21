@@ -2,10 +2,10 @@ import os
 import numpy as np
 import pandas as pd
 
-def extract_input_from_lead(path = "ECG_Data_Lead_11_labels/"):
+def extract_input_from_lead(files_path = "ECG_Data_Lead_11_labels/", save_path='ECG_Data_Lead_csv/11_labels/ECG_11_labels_no_splits.csv'):
     curDir = os.getcwd()
     # Percorre todos os arquivos do diretório original
-    dataPath = os.path.join(curDir, path)
+    dataPath = os.path.join(curDir, files_path)
 
     DF = []
 
@@ -30,7 +30,7 @@ def extract_input_from_lead(path = "ECG_Data_Lead_11_labels/"):
     df.rename(columns={700: 'lead', 701: 'label', 702: 'patient', 703: 'cycle'}, inplace=True)
 
     # Save the dataframes to csv
-    df.to_csv('ECG_Data_Lead_csv/11_labels/ECG_11_labels_no_splits.csv', index=False)
+    df.to_csv(save_path, index=False)
 
 if __name__ == '__main__':
     extract_input_from_lead()

@@ -9,7 +9,7 @@ preprocessed_epochs/
 processed_epochs/
 ptb-diagnostic-ecg-database/
 Results_ECG/
-Results_ECG_Lead/
+Results_ECG_lead/
 Results_ECG_lead_metrics/
 eeg_create_dataset.py
 eeg_load_dataset.ipynb
