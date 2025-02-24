@@ -93,7 +93,7 @@ def processSignals11Labels():
         currentSignalLabel = currentSignal['label']
 
         ecg = Read.read_ecg_dat(currentSignalPath)
-        ecg.signal = Filter.fir_biosppy(ecg.signal, ecg.samplingFreq)
+        #ecg.signal = Filter.fir_biosppy(ecg.signal, ecg.samplingFreq)
         
         numberOfCycles = ecg.rPeakIndexes.shape[0] - 1
         for cycle in range(1, numberOfCycles+1):

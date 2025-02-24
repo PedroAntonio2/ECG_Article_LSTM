@@ -107,7 +107,7 @@ def create_signal_list_11_labels(path = 'ptb-diagnostic-ecg-database'):
     
     df = pd.DataFrame(signals['path'], columns=['path'])
     df['label'] = signals['labels']
-    #df.to_csv('signals_list.csv', index=False)
+    df.to_csv('signals_list.csv', index=False)
     split_csv_train_val_test(df, '11_labels')
 
 def split_csv_train_val_test(signal_list, labels = '2_labels'):
